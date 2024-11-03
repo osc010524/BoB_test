@@ -44,7 +44,7 @@ class ProcessRunner():
         except subprocess.CalledProcessError as e:
             logging.error(f"RabbitMQ server shutdown failed: {e}")
         except Exception as e:
-            logging.error(f"오류 발생: {e}")
+            logging.error(f"Error : {e}")
 
     def start(self) :
         # 로깅 설정
@@ -89,7 +89,7 @@ class ProcessRunner():
         except subprocess.CalledProcessError as e:
             logging.error(f"RabbitMQ server shutdown failed: {e}")
         except Exception as e:
-            logging.error(f"오류 발생: {e}")
+            logging.error(f"Error: {e}")
 
     def kill_pocess(self) :
         pid = self.get_pid()
@@ -116,7 +116,7 @@ class ProcessRunner():
             pid_match = re.search(rb'OS PID:\s+(\d+)', result.stdout)
             if pid_match:
                 _pid = int(pid_match.group(1))
-                logging.info(f"RabbitMQ 서버 PID: {_pid}")
+                logging.info(f"RabbitMQ server PID: {_pid}")
             else:
                 logging.error("PID not found in the output.")
                 Exception("PID not found in the output.")
@@ -125,7 +125,7 @@ class ProcessRunner():
             logging.error(f"RabbitMQ server PID not found: {e}")
             return False
         except Exception as e:
-            logging.error(f"오류 발생: {e}")
+            logging.error(f"Error: {e}")
         else:
             if _pid == None :
                 return True

@@ -1,3 +1,5 @@
+import time
+
 from DCD_Fuzzer.data_model import Rabbit, logging
 from DCD_Fuzzer.data_model import login_header, Default_header
 import requests
@@ -18,13 +20,23 @@ class Web_login:
         # 로그인 요청
         # authorization: Basic cmFiYml0OnJhYmJpdA==
         login_header["authorization"] = "Basic cmFiYml0OnJhYmJpdA=="
-        response = requests.get(url, headers=login_header, auth=HTTPBasicAuth(username, password))
+        count = 0
+        while ( count<10 ):
+            try:
+                response = requests.get(url, headers=login_header, auth=HTTPBasicAuth(username, password))
+            except requests.exceptions.ConnectionError:
+                time.sleep(1)
+                count += 1
+            else:
+                break
 
         # 로그인 성공 여부 확인
         if response.status_code == 200:
             logging.info("Login successful!")
+            return True
         else:
             logging.error(f"Login failed! status code: {response.status_code}")
+            return False
 
 def user_login(self,id, pw):
         endpoint = "api/whoami"
@@ -41,3 +53,4 @@ def user_login(self,id, pw):
 if __name__ == '__main__':
     Web_login().admin_login()
     # add_user()
+    pass

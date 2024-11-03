@@ -13,12 +13,12 @@ import time
 # 관리 사용자가 일반 유저 추가 -> 성공 -> Rabbit 재시작 -> 성공 -> 관리사용자 로그인 -> 실폐 -> 백업 및 데이터 저장 -> 종료
 
 def loop(id,pw):
-    Web_login.admin_login()
+    Web_login().admin_login()
     add_rabbitmq_user(id, pw)
     time.sleep(1)
-    ProcessRunner().restart()
+    ProcessRunner().reboot()
 
-    if not Web_login.admin_login():
+    if not Web_login().admin_login():
         logging.info("Trigger!!")
         logging.error("Failed to add user")
         backup_mnesia_folder()
