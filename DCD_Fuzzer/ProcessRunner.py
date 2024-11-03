@@ -1,6 +1,8 @@
 import subprocess
 import time
 import os
+from turtledemo.clock import setup
+
 from DCD_Fuzzer.data_model import logging, System
 
 class ProcessRunner():
@@ -82,10 +84,21 @@ class ProcessRunner():
         except Exception as e:
             logging.error(f"오류 발생: {e}")
 
-    def reboot(self) :
-        pid = self.stop()
-        self.start(pid)
+    def kill_pocess(self, pid) :
+        # pid에 시그널 9를 보내 프로세스 강제 종료
+        os.kill(pid, 9)
+        if self.is_server_stopped(pid):
+            logging.info("프로세스가 성공적으로 종료되었습니다.")
+        else:
+            logging.error("프로세스가 종료되지 않았습니다.")
+            Exception("RabbitMQ 프로세스 종료 실패")
 
+    def reboot(self) :
+        # pid = self.stop()
+        # self.start(pid)
+        pid = self.start()
+        # self.stop(pid)
+        self.kill_pocess(pid)
     # RabbitMQ 서버 시작 및 상태 확인 함수
     def start_rabbitmq_server(self, max_retries=1, wait_interval=1):
         command = os.path.join(System.rabbitmq_sbin_path, "rabbitmqctl.bat") + " start_app"
