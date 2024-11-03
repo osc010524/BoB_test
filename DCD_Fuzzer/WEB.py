@@ -20,9 +20,9 @@ class Web_login:
 
         # 로그인 성공 여부 확인
         if response.status_code == 200:
-            logging.info("로그인 성공!")
+            logging.info("Login successful!")
         else:
-            logging.error(f"로그인 실패! 상태 코드: {response.status_code}")
+            logging.error(f"Login failed! status code: {response.status_code}")
 
 def user_login(self,id, pw):
         endpoint = "api/whoami"
@@ -32,9 +32,9 @@ def user_login(self,id, pw):
 
         # 로그인 성공 여부 확인
         if response.status_code == 200:
-            logging.info("로그인 성공!")
+            logging.info("Login successful!")
         else:
-            logging.error(f"로그인 실패! 상태 코드: {response.status_code}")
+            logging.error(f"Login failed! status code: {response.status_code}")
 
 if __name__ == '__main__':
     login()

@@ -7,6 +7,12 @@ import re
 
 from DCD_Fuzzer.data_model import logging, System
 
+import psutil
+
+def is_pid_alive(pid):
+    """주어진 PID가 살아있는지 확인"""
+    return psutil.pid_exists(pid)
+
 class ProcessRunner():
     def __init__(self):
         pass
@@ -23,20 +29,20 @@ class ProcessRunner():
 
         try:
             # RabbitMQ 서버 시작
-            logging.info("RabbitMQ 서버를 시작합니다.")
+            logging.info("RabbitMQ Server Start.")
             server_process = subprocess.Popen(rabbitmq_start_command, shell=False)
 
             time.sleep(1)  # 필요에 따라 서버가 준비될 때까지 기다립니다
-            logging.info("RabbitMQ 서버가 정상적으로 시작되었습니다.")
+            logging.info("The RabbitMQ server started successfully.")
 
             # time.sleep(1)  # 필요에 따라 서버가 준비될 때까지 기다립니다
             # RabbitMQ 서버 종료
-            logging.info("RabbitMQ 서버를 종료합니다.")
+            logging.info("Shut down the RabbitMQ server.")
             subprocess.run(rabbitmq_stop_command, shell=False, check=True)
-            logging.info("RabbitMQ 서버가 정상적으로 종료되었습니다.")
+            logging.info("RabbitMQ server terminated normally")
 
         except subprocess.CalledProcessError as e:
-            logging.error(f"RabbitMQ 서버 종료에 실패했습니다: {e}")
+            logging.error(f"RabbitMQ server shutdown failed: {e}")
         except Exception as e:
             logging.error(f"오류 발생: {e}")
 
@@ -49,20 +55,20 @@ class ProcessRunner():
 
         try:
             # RabbitMQ 서버 시작
-            logging.info("RabbitMQ 서버를 시작합니다.")
+            logging.info("RabbitMQ Server start.")
             server_process = subprocess.Popen(rabbitmq_start_command, shell=False)
             pid = server_process.pid
 
             # 서버가 시작되고 실행되는 동안 대기 (여기서는 10초 대기)
             if not self.start_rabbitmq_server():
-                logging.error("RabbitMQ 서버 시작에 실패했습니다.")
+                logging.error("RabbitMQ server startup failed.")
             else:
-                logging.info("RabbitMQ 서버가 정상적으로 시작되었습니다.")
+                logging.info("The RabbitMQ server started successfully.")
 
         except subprocess.CalledProcessError as e:
-            logging.error(f"RabbitMQ 서버 시작에 실패했습니다: {e}")
+            logging.error(f"RabbitMQ server failed to start: {e}")
         except Exception as e:
-            logging.error(f"오류 발생: {e}")
+            logging.error(f"Error: {e}")
 
 
     def stop(self, pid) :
@@ -74,52 +80,61 @@ class ProcessRunner():
 
         try:
             # RabbitMQ 서버 종료
-            logging.info("RabbitMQ 서버를 종료합니다.")
+            logging.info("Shut down the RabbitMQ server")
             subprocess.run(rabbitmq_stop_command, shell=False, check=True)
             self.is_server_stopped(pid)
 
-            logging.info("RabbitMQ 서버가 정상적으로 종료되었습니다.")
+            logging.info("RabbitMQ server terminated normally.")
 
         except subprocess.CalledProcessError as e:
-            logging.error(f"RabbitMQ 서버 종료에 실패했습니다: {e}")
+            logging.error(f"RabbitMQ server shutdown failed: {e}")
         except Exception as e:
             logging.error(f"오류 발생: {e}")
 
     def kill_pocess(self) :
         pid = self.get_pid()
-        # pid에 시그널 9를 보내 프로세스 강제 종료
-        os.kill(pid, 9)
-        if self.is_server_stopped(pid):
-            logging.info("프로세스가 성공적으로 종료되었습니다.")
+        if pid != None and type(pid) == int :
+            # pid에 시그널 9를 보내 프로세스 강제 종료
+            try:
+                subprocess.run(["taskkill", "/PID", str(pid), "/F"], check=True)
+            except:
+                Exception("RabbitMQ process termination failed")
+
+        if not is_pid_alive(pid):
+            logging.info("The process ended successfully.")
         else:
-            logging.error("프로세스가 종료되지 않았습니다.")
-            Exception("RabbitMQ 프로세스 종료 실패")
+            logging.error("The process has not terminated.")
+            Exception("RabbitMQ process termination failed")
 
     def get_pid(self) :
         # RabbitMQ 서버 실행 경로 설정
         rabbitmq_pid_command = os.path.join(System.rabbitmq_sbin_path, "rabbitmqctl.bat") + " status"
-
+        _pid = None
         try:
             # RabbitMQ 서버 시작
             result = subprocess.run(rabbitmq_pid_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            print(result.stdout)
             pid_match = re.search(rb'OS PID:\s+(\d+)', result.stdout)
             if pid_match:
-                pid = pid_match.endpos
-                logging.info(f"RabbitMQ 서버 PID: {pid}")
+                _pid = int(pid_match.group(1))
+                logging.info(f"RabbitMQ 서버 PID: {_pid}")
             else:
                 logging.error("PID not found in the output.")
                 Exception("PID not found in the output.")
-
-            return pid
-
+                
         except subprocess.CalledProcessError as e:
-            logging.error(f"RabbitMQ 서버 시작에 실패했습니다: {e}")
+            logging.error(f"RabbitMQ server PID not found: {e}")
+            return False
         except Exception as e:
             logging.error(f"오류 발생: {e}")
+        else:
+            if _pid == None :
+                return True
+            else :
+                return _pid
 
     def reboot(self) :
         self.kill_pocess()
+        time.sleep(1)
         self.start()
 
 # RabbitMQ 서버 시작 및 상태 확인 함수
@@ -132,28 +147,37 @@ class ProcessRunner():
                 result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 return result.returncode == 0  # 성공적으로 실행되면 서버가 실행 중
             except Exception as e:
-                logging.error(f"서버 상태 확인 중 오류 발생: {e}")
+                logging.error(f"Error occurred while checking server status: {e}")
                 return False
 
         time.sleep(wait_interval)
         # 서버 준비 대기
         for _ in range(max_retries):
             if is_rabbitmq_running():
-                logging.info("RabbitMQ 서버가 성공적으로 시작되었습니다.")
+                logging.info("RabbitMQ server started successfully")
                 return True
-            logging.info("서버 시작 대기 중...")
+            logging.info("Waiting for server to start...")
             time.sleep(wait_interval)
 
-        logging.error("RabbitMQ 서버 시작에 실패했습니다.")
+        logging.error("RabbitMQ server failed to start.")
         return False
 
     def is_server_stopped(self, pid, max_retries=1, wait_interval=1):
         def check_pid(pid):
             try:
-                # pid에 시그널 0을 보냄으로써 프로세스 존재 여부 확인
-                os.kill(pid, 0)
+                if pid == True:
+                    return True
+                elif pid == False:
+                    return False
+                elif pid == None:
+                    return True
+                else:
+                    # pid에 시그널 0을 보냄으로써 프로세스 존재 여부 확인
+                    subprocess.run(["taskkill", "/PID", str(pid), "/F"], check=True)
             except OSError:
                 return True  # 프로세스가 존재하지 않으면 서버가 종료된 상태
+            except subprocess.CalledProcessError:
+                return True
             else:
                 return False  # 프로세스가 존재하면 서버가 아직 실행 중
 
@@ -161,12 +185,12 @@ class ProcessRunner():
         # 서버가 종료될 때까지 대기
         for _ in range(max_retries):
             if check_pid(pid):
-                logging.info("RabbitMQ 서버가 종료되었습니다.")
+                logging.info("RabbitMQ server terminated.")
                 return True
-            logging.info("서버 종료 대기 중...")
+            logging.info("Waiting for server shutdown...")
             time.sleep(wait_interval)
 
-        logging.error("서버가 여전히 실행 중입니다.")
+        logging.error("The server is still running.")
         return False
 
 if __name__ == '__main__':
@@ -174,5 +198,6 @@ if __name__ == '__main__':
     # process_runner.run()
     # pid=ProcessRunner().get_pid()
     # print(pid)
+    ProcessRunner().kill_pocess()
 
     pass

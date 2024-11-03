@@ -8,6 +8,26 @@ import tkinter as tk
 from tkinter import scrolledtext
 import time
 import logging
+import psutil
+
+class TextHandler(logging.Handler):
+    """로그를 tkinter ScrolledText 위젯에 출력하는 핸들러"""
+
+    def __init__(self, text_widget):
+        super().__init__()
+        self.text_widget = text_widget
+
+    def emit(self, record):
+        # 로그 메시지 생성
+        msg = self.format(record)
+        # ScrolledText에 추가
+        self.text_widget.insert(tk.END, msg + "\n")
+        # 스크롤을 자동으로 아래로 이동
+        self.text_widget.see(tk.END)
+
+def is_pid_alive(pid):
+    """주어진 PID가 살아있는지 확인"""
+    return psutil.pid_exists(pid)
 
 class TextHandler(logging.Handler):
     """로그를 tkinter ScrolledText 위젯에 출력하는 핸들러"""
@@ -30,7 +50,7 @@ def loop(id, pw):
     time.sleep(1)
     ProcessRunner().reboot()
 
-    if not Web_login.admin_login():
+    if not Web_login().admin_login():
         logging.info("Trigger!!")
         logging.error("Failed to add user")
         backup_mnesia_folder()
@@ -45,6 +65,7 @@ def start_process():
         total_lines = sum(1 for line in file)
 
     ProcessRunner().start()
+
     n = 0
     with open(System.attck_path, "r") as file:
         for line in file:

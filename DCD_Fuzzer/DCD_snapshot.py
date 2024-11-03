@@ -24,9 +24,9 @@ def backup_mnesia_folder():
 
     try:
         shutil.copytree(mnesia_path, backup_path)
-        logging.info(f"Mnesia 폴더가 성공적으로 백업되었습니다: {backup_path}")
+        logging.info(f"The Mnesia folder has been successfully backed up.: {backup_path}")
         return True
     except Exception as e:
-        logging.error(f"백업 중 오류가 발생했습니다: {e}")
+        logging.error(f"An error occurred during backup: {e}")
         return Exception
 
