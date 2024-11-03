@@ -22,7 +22,7 @@ def loop(id,pw):
     Web_login.admin_login()
     add_rabbitmq_user(id, pw)
     time.sleep(1)
-    ProcessRunner().restart()
+    ProcessRunner().reboot()
 
     if not Web_login.admin_login():
         logging.info("Trigger!!")
