@@ -102,9 +102,10 @@ class ProcessRunner():
         try:
             # RabbitMQ 서버 시작
             result = subprocess.run(rabbitmq_pid_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            pid_match = re.search(r'OS PID:\s+(\d+)', result.stdout)
+            print(result.stdout)
+            pid_match = re.search(rb'OS PID:\s+(\d+)', result.stdout)
             if pid_match:
-                pid = pid_match.group(1)
+                pid = pid_match.endpos
                 logging.info(f"RabbitMQ 서버 PID: {pid}")
             else:
                 logging.error("PID not found in the output.")
@@ -168,6 +169,10 @@ class ProcessRunner():
         logging.error("서버가 여전히 실행 중입니다.")
         return False
 
-# if __name__ == '__main__':
-#     process_runner = ProcessRunner()
-#     process_runner.run()
+if __name__ == '__main__':
+    # process_runner = ProcessRunner()
+    # process_runner.run()
+    # pid=ProcessRunner().get_pid()
+    # print(pid)
+
+    pass
