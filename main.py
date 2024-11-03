@@ -9,6 +9,21 @@ from tkinter import scrolledtext
 import time
 import logging
 
+class TextHandler(logging.Handler):
+    """로그를 tkinter ScrolledText 위젯에 출력하는 핸들러"""
+
+    def __init__(self, text_widget):
+        super().__init__()
+        self.text_widget = text_widget
+
+    def emit(self, record):
+        # 로그 메시지 생성
+        msg = self.format(record)
+        # ScrolledText에 추가
+        self.text_widget.insert(tk.END, msg + "\n")
+        # 스크롤을 자동으로 아래로 이동
+        self.text_widget.see(tk.END)
+
 def loop(id, pw):
     Web_login.admin_login()
     add_rabbitmq_user(id, pw)
@@ -36,8 +51,8 @@ def start_process():
             line = line.strip()
             logging.info(f"{'='*10} Task {n} Start {'='*10}")
             logging.info(f"ID: Test_1_{n} PW: {line}")
-            id = input("id: ")
-            pw = input("pw: ")
+            id = "Test_1_" + str(n)
+            pw = line
             loop(id, pw)
 
             # GUI의 진행 상태 표시 업데이트

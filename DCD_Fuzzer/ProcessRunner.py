@@ -45,7 +45,7 @@ class ProcessRunner():
         logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
         # RabbitMQ 서버 실행 경로 설정
-        rabbitmq_start_command = os.path.join(System.rabbitmq_sbin_path, "rabbitmq-server.bat")
+        rabbitmq_start_command = os.path.join(System.rabbitmq_sbin_path, "rabbitmq-server.bat")+ " -detached"
 
         try:
             # RabbitMQ 서버 시작
@@ -71,7 +71,7 @@ class ProcessRunner():
         logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
         # RabbitMQ 서버 실행 경로 설정
-        rabbitmq_stop_command = os.path.join(System.rabbitmq_sbin_path, "rabbitmqctl.bat") + " -detached"
+        rabbitmq_stop_command = os.path.join(System.rabbitmq_sbin_path, "rabbitmqctl.bat")
 
         try:
             # RabbitMQ 서버 종료
