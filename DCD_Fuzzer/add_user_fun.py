@@ -11,7 +11,7 @@ def add_rabbitmq_user(new_user, new_password, tags="management"):
 
     Parameters:
         new_user (str): 추가할 유저 이름
-        new_password (str): 추가할 유저 비밀번호
+        new_password : 추가할 유저 비밀번호
         tags (str): 유저 권한 (기본값: "management")
 
     Returns:

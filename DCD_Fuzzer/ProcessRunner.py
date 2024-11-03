@@ -64,7 +64,6 @@ class ProcessRunner():
         except Exception as e:
             logging.error(f"오류 발생: {e}")
 
-        return pid
 
     def stop(self, pid) :
         # 로깅 설정
