@@ -31,7 +31,7 @@ def add_rabbitmq_user(new_user, new_password, tags="management"):
     try:
         response = requests.put(rabbitmq_url, json=data, auth=HTTPBasicAuth(admin_user, admin_pass))
 
-        if response.status_code == 204:
+        if 200 <= response.status_code < 300:
             logging.info(f"User '{new_user}' added successfully.")
             return True
         else:

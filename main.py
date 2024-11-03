@@ -20,7 +20,7 @@ def loop(id,pw):
 
     if not Web_login().admin_login():
         logging.info("Trigger!!")
-        logging.error("Failed to add user")
+        logging.error("Failed to login adminUser")
         backup_mnesia_folder()
         return Exception("Trigger!!")
 

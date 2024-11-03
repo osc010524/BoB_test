@@ -32,7 +32,7 @@ class Web_login:
                 return False
 
         # 로그인 성공 여부 확인
-        if response.status_code == 200:
+        if 200 <= response.status_code < 300:
             logging.info("Login successful!")
             return True
         else:
@@ -46,7 +46,7 @@ def user_login(self,id, pw):
         response = requests.get(url, headers=login_header, auth=HTTPBasicAuth(id, pw))
 
         # 로그인 성공 여부 확인
-        if response.status_code == 200:
+        if 200 <= response.status_code < 300 == 200:
             logging.info("Login successful!")
         else:
             logging.error(f"Login failed! status code: {response.status_code}")
