@@ -31,12 +31,12 @@ def loop(id,pw):
 
 
 if __name__ == '__main__':
-    with open(System.attck_path, "r") as file:
+    with open(System.attck_path, "r", encoding="utf-8") as file:
         total_lines = sum(1 for line in file)
 
     ProcessRunner().start()
     n = 0
-    with open(System.attck_path, "r") as file:
+    with open(System.attck_path, "r", encoding="utf-8") as file:
         for line in tqdm(file, total=total_lines, desc="Reading lines"):
             line = line.strip()
             tqdm.write(f"PW: {line}")  # tqdm 바 외부에 출력하는 방법도 있음

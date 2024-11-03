@@ -24,20 +24,19 @@ class Web_login:
         while ( count<10 ):
             try:
                 response = requests.get(url, headers=login_header, auth=HTTPBasicAuth(username, password))
+                # 로그인 성공 여부 확인
+                if 200 <= response.status_code < 300:
+                    logging.info("Login successful!")
+                    return True
+                else:
+                    logging.error(f"Login failed! status code: {response.status_code}")
+                    return False
             except requests.exceptions.ConnectionError:
                 time.sleep(1)
                 count += 1
-            else:
-                logging.error("login error")
-                return False
+        return False
 
-        # 로그인 성공 여부 확인
-        if 200 <= response.status_code < 300:
-            logging.info("Login successful!")
-            return True
-        else:
-            logging.error(f"Login failed! status code: {response.status_code}")
-            return False
+
 
 def user_login(self,id, pw):
         endpoint = "api/whoami"
@@ -51,7 +50,7 @@ def user_login(self,id, pw):
         else:
             logging.error(f"Login failed! status code: {response.status_code}")
 
-if __name__ == '__main__':
-    Web_login().admin_login()
-    # add_user()
-    pass
+# if __name__ == '__main__':
+#     Web_login().admin_login()
+#     # add_user()
+#     pass

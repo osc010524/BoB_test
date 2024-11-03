@@ -99,12 +99,13 @@ class ProcessRunner():
                 subprocess.run(["taskkill", "/PID", str(pid), "/F"], check=True)
             except:
                 Exception("RabbitMQ process termination failed")
+                if not is_pid_alive(pid):
+                    logging.info("The process ended successfully.")
+                else:
+                    logging.error("The process has not terminated.")
+                    Exception("RabbitMQ process termination failed")
 
-        if not is_pid_alive(pid):
-            logging.info("The process ended successfully.")
-        else:
-            logging.error("The process has not terminated.")
-            Exception("RabbitMQ process termination failed")
+
 
     def get_pid(self) :
         # RabbitMQ 서버 실행 경로 설정
