@@ -4,25 +4,16 @@ from DCD_Fuzzer.WEB import Web_login
 from DCD_Fuzzer.data_model import logging, System
 from DCD_Fuzzer.DCD_snapshot import backup_mnesia_folder
 
-import re
-import subprocess
 import tkinter as tk
 from tkinter import scrolledtext
-from tqdm import tqdm
 import time
-import threading
 import logging
 
-# Rabbit 시작
-# 관리 사용자가 일반 유저 추가 -> 성공 -> Rabbit 재시작 -> 성공 -> 관리사용자 로그인 -> 성공
-# 관리 사용자가 일반 유저 추가 -> 성공 -> Rabbit 재시작 -> 성공 -> 관리사용자 로그인 -> 성공
-# 관리 사용자가 일반 유저 추가 -> 성공 -> Rabbit 재시작 -> 성공 -> 관리사용자 로그인 -> 실폐 -> 백업 및 데이터 저장 -> 종료
-
-def loop(id,pw):
+def loop(id, pw):
     Web_login.admin_login()
     add_rabbitmq_user(id, pw)
     time.sleep(1)
-    ProcessRunner().reboot()
+    ProcessRunner().restart()
 
     if not Web_login.admin_login():
         logging.info("Trigger!!")
@@ -30,48 +21,49 @@ def loop(id,pw):
         backup_mnesia_folder()
         return Exception("Trigger!!")
 
-    else :
+    else:
         logging.info("Success to add user")
         logging.info("Success to login")
 
-
-
-# 로깅 설정
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
-def run_rabbitmqctl():
-    result = subprocess.run(['rabbitmqctl', 'status'], capture_output=True, text=True)
-    pid_match = re.search(r'OS PID:\s+(\d+)', result.stdout)
-    if pid_match:
-        pid = pid_match.group(1)
-        log_message = f"Extracted PID: {pid}"
-    else:
-        log_message = "PID not found in the output."
-
-    logging.info(log_message)
-    log_text.insert(tk.END, f"{log_message}\n")
-    log_text.see(tk.END)
-
-def run_with_progress():
-    for _ in tqdm(range(1), desc="Running rabbitmqctl status"):
-        time.sleep(0.1)  # tqdm 표시를 위한 짧은 대기 시간
-    run_rabbitmqctl()
-
 def start_process():
-    threading.Thread(target=run_with_progress).start()
+    with open(System.attck_path, "r") as file:
+        total_lines = sum(1 for line in file)
+
+    ProcessRunner().start()
+    n = 0
+    with open(System.attck_path, "r") as file:
+        for line in file:
+            line = line.strip()
+            logging.info(f"{'='*10} Task {n} Start {'='*10}")
+            logging.info(f"ID: Test_1_{n} PW: {line}")
+            id = input("id: ")
+            pw = input("pw: ")
+            loop(id, pw)
+
+            # GUI의 진행 상태 표시 업데이트
+            update_progress(n, total_lines)
+            n += 1
 
 # GUI 설정
 root = tk.Tk()
 root.title("RabbitMQ Status Checker")
-root.geometry("500x300")
+root.geometry("500x400")
 
 # 로그 창
 log_text = scrolledtext.ScrolledText(root, width=60, height=15)
 log_text.pack(pady=10)
 
-# 실행 버튼
-start_button = tk.Button(root, text="Start", command=start_process)
-start_button.pack()
+# 진행 상태 표시 라벨
+progress_label = tk.Label(root, text="Progress: 0%", font=("Helvetica", 12))
+progress_label.pack(pady=10)
+
+def update_progress(current, total):
+    percentage = int((current / total) * 100)
+    progress_label.config(text=f"Progress: {percentage}%")
+    root.update_idletasks()
+
+# 시작 버튼
+start_button = tk.Button(root, text="Start Process", command=start_process)
+start_button.pack(pady=20)
 
 root.mainloop()
-
