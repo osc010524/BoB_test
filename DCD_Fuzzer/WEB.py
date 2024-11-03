@@ -28,7 +28,8 @@ class Web_login:
                 time.sleep(1)
                 count += 1
             else:
-                break
+                logging.error("login error")
+                return False
 
         # 로그인 성공 여부 확인
         if response.status_code == 200:
