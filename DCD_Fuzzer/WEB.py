@@ -16,6 +16,8 @@ class Web_login:
         endpoint = "api/whoami"
         url = urljoin(Rabbit.host_url, endpoint)
         # 로그인 요청
+        # authorization: Basic cmFiYml0OnJhYmJpdA==
+        login_header["authorization"] = "Basic cmFiYml0OnJhYmJpdA=="
         response = requests.get(url, headers=login_header, auth=HTTPBasicAuth(username, password))
 
         # 로그인 성공 여부 확인
@@ -37,5 +39,5 @@ def user_login(self,id, pw):
             logging.error(f"Login failed! status code: {response.status_code}")
 
 if __name__ == '__main__':
-    login()
+    Web_login().admin_login()
     # add_user()
