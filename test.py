@@ -1,5 +1,12 @@
-from DCD_Fuzzer.__init__ import *
+from traceback import print_exception
+
+from DCD_Fuzzer.data_model import *
 import requests
+import os
+
+pwd = os.getcwd()
+print(pwd)
+
 
 
 def check_print(tag, plan, status):
@@ -11,11 +18,14 @@ def check_print(tag, plan, status):
 
 
 class TestRequest():
-    def test_check_website_status(self, mock_get):
+    def test_check_website_status(self):
         tage = "Website"
         stat = False
-        mock_get.return_value.status_code = 200
-        response = requests.get(Rabbit.host_url)
+        try:
+            response = requests.get(Rabbit.host_url)
+        except requests.exceptions.ConnectionError as e:
+            print("Connection Error")
+            exit(1)
         if response.status_code == 200:
             stat = True
         else:
@@ -25,10 +35,9 @@ class TestRequest():
 
         return stat
 
-    def test_check_admin_login_status(self, mock_get):
+    def test_check_admin_login_status(self):
         tage = "Admin Login"
         stat = False
-        mock_get.return_value.status_code = 200
         response = requests.get(Rabbit.host_url, auth=Rabbit.get_bs64_auth())
         if response.status_code == 200:
             stat = True
