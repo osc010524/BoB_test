@@ -2,6 +2,8 @@ import subprocess
 import time
 import os
 from turtledemo.clock import setup
+import re
+
 
 from DCD_Fuzzer.data_model import logging, System
 
@@ -69,7 +71,7 @@ class ProcessRunner():
         logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
         # RabbitMQ 서버 실행 경로 설정
-        rabbitmq_stop_command = os.path.join(System.rabbitmq_sbin_path, "rabbitmqctl.bat") + " stop"
+        rabbitmq_stop_command = os.path.join(System.rabbitmq_sbin_path, "rabbitmqctl.bat") + " -detached"
 
         try:
             # RabbitMQ 서버 종료
@@ -92,6 +94,28 @@ class ProcessRunner():
         else:
             logging.error("프로세스가 종료되지 않았습니다.")
             Exception("RabbitMQ 프로세스 종료 실패")
+
+    def get_pid(self) :
+        # RabbitMQ 서버 실행 경로 설정
+        rabbitmq_pid_command = os.path.join(System.rabbitmq_sbin_path, "rabbitmqctl.bat") + " status"
+
+        try:
+            # RabbitMQ 서버 시작
+            result = subprocess.run(rabbitmq_pid_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            pid_match = re.search(r'OS PID:\s+(\d+)', result.stdout)
+            if pid_match:
+                pid = pid_match.group(1)
+                logging.info(f"RabbitMQ 서버 PID: {pid}")
+            else:
+                logging.error("PID not found in the output.")
+                Exception("PID not found in the output.")
+
+            return pid
+
+        except subprocess.CalledProcessError as e:
+            logging.error(f"RabbitMQ 서버 시작에 실패했습니다: {e}")
+        except Exception as e:
+            logging.error(f"오류 발생: {e}")
 
     def reboot(self) :
         # pid = self.stop()
