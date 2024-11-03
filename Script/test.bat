@@ -7,7 +7,7 @@ set VENV_DIR=venv
 call %VENV_DIR%\Scripts\activate.bat
 
 :: 파이썬 메인 파일 실행
-python test.py
+python ../test.py
 
 :: 가상 환경 비활성화
 deactivate

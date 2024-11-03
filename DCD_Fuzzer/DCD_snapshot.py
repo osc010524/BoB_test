@@ -29,3 +29,4 @@ def backup_mnesia_folder():
     except Exception as e:
         logging.error(f"백업 중 오류가 발생했습니다: {e}")
         return Exception
+
